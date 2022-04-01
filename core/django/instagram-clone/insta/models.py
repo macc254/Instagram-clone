@@ -15,8 +15,8 @@ class Image(models.Model):
     def save_image(self):
         self.save()
     @classmethod
-    def search_by_name(cls, name):
-        images = cls.objects.filter(name__name__icontains=name)
+    def search_by_name(cls, image):
+        images = cls.objects.filter(image__icontains=image)
         return images
         
 class Profile(models.Model):

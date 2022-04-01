@@ -1,16 +1,26 @@
 from django.shortcuts import render
 from django.http  import HttpResponse
 from .models import Image,Profile
+from .forms import NewsLetterForm
+
 
 
 # Create your views here.
 def profile(request):
     profile = Profile.objects.all()
+    image = Image.objects.all()
 
-    return render(request, 'home.html',{'profile':profile})
+
+    return render(request, 'home.html',{'profile':profile,'image':image})
 
 def display_image(request):
     image = Image.objects.all()
+    if request.method == 'POST':
+        form = NewsLetterForm(request.POST)
+        if form.is_valid():
+            print('valid')
+    else:
+        form = NewsLetterForm()
     return render(request,'all-images.html',{'image':image})
 
 
