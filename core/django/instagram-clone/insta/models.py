@@ -14,7 +14,10 @@ class Image(models.Model):
         
     def save_image(self):
         self.save()
-        
+    @classmethod
+    def search_by_name(cls, name):
+        images = cls.objects.filter(name__name__icontains=name)
+        return images
         
 class Profile(models.Model):
     bio = models.CharField(max_length =30)
