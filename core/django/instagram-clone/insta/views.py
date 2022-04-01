@@ -9,18 +9,17 @@ from .forms import NewsLetterForm
 def profile(request):
     profile = Profile.objects.all()
     image = Image.objects.all()
-
-
-    return render(request, 'home.html',{'profile':profile,'image':image})
-
-def display_image(request):
-    image = Image.objects.all()
     if request.method == 'POST':
         form = NewsLetterForm(request.POST)
         if form.is_valid():
             print('valid')
     else:
         form = NewsLetterForm()
+    return render(request, 'home.html',{'profile':profile,'image':image,"letterForm":form})
+
+def display_image(request):
+    image = Image.objects.all()
+ 
     return render(request,'all-images.html',{'image':image})
 
 
