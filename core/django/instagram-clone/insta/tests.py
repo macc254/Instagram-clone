@@ -6,12 +6,12 @@ class ImageTestClass(TestCase):
 
     # Set up method
     def setUp(self):
-        self.roku= Image(name = 'roku', caption ='Fire-Lord')
+        self.rara= Image(name = 'rara', caption ='air-Lord',image ='juice.jpeg',likes='5',comments='hei')
     #Testing  instance
-    def test_instance(self):
-        self.assertTrue(isinstance(self.roku,Image))
-     # Testing Save Method
-    def test_save_method(self):
-        self.roku.save_image()
-        images = Image.objects.all()
-        self.assertTrue(len(images) > 0)
+    # def test_instance(self):
+    #     self.assertTrue(isinstance(self.rara,Image))
+    #  # Testing Save Method
+    # def test_save_method(self):
+    #     self.rara.save_image()
+    #     images = Image.objects.all()
+    #     self.assertTrue(len(images) > 0)
