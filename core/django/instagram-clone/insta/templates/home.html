@@ -1,2 +1,14 @@
 {%extends 'base.html'%} {% block content %} {{block.super}}
-<h1> Welcome to the Instagram.</h1> {% for p in profile %} {% endblock %}
+<h1> Welcome to the Instagram.</h1> {% for p in profile %}
+<div class='row'>
+
+    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+        <img src="{{p.profile_photo.url}}" class="img-fluid rounded-circle" alt="Image">
+    </div>
+    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+        <p style="color: #6153cc;">Like: {{p.bio}}</p>
+    </div>
+
+</div>
+
+{% endfor %} {% endblock %}
