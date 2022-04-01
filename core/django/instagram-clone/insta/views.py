@@ -4,11 +4,12 @@ from .models import Image,Profile
 
 
 # Create your views here.
-def welcome(request):
-    return render(request, 'home.html')
+def profile(request):
+    profile = Profile.objects.all()
+
+    return render(request, 'home.html',{'profile':profile})
 
 def display_image(request):
-    profile = Profile.objects.all()
     image = Image.objects.all()
-    return render(request,'all-images.html',{'image':image,'profile':profile})
+    return render(request,'all-images.html',{'image':image})
 
