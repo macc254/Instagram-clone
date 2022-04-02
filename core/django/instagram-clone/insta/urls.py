@@ -16,8 +16,13 @@ urlpatterns=[
     re_path('accounts/register/',
         RegistrationView.as_view(success_url='/profile/'),
         name='django_registration_register'),
-    # re_path(r'^logout/$', views.logout, {"next_page": '/'}), 
+    # re_path(r'^accounts/logout/', views.logout, {"next_page": '/'}), 
     re_path(r'^tinymce/', include('tinymce.urls')),
+    re_path(r'profile/(?P<profile>[a-zA-Z0-9]+)$', views.get_user_profile,name='get_user_profile'),
+
+    re_path(r'^new/image$', views.new_image, name='new_image'),
+
+
 
 
 ]
