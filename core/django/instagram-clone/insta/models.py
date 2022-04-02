@@ -1,12 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.core.exceptions import ObjectDoesNotExist
 
 class Image(models.Model):
     image = models.ImageField(upload_to='images/',default='1')
     name = models.CharField(max_length =30)
     caption = models.CharField(max_length =30)
     profile = models.ForeignKey(User,on_delete=models.CASCADE,default='0')
-    likes = models.IntegerField()
+    likes = models.ManyToManyField(User,related_name='likes')
     comments = models.CharField(max_length =30)
     
     def __str__(self):
@@ -16,6 +19,15 @@ class Image(models.Model):
         
     def save_image(self):
         self.save()
+    def total_likes(self):
+        return self.likes.count()
+
+    def delete_image(self):
+        self.delete()
+    @classmethod
+    def update_image(cls,old,new):
+        cap = Image.objects.filter(caption=old).update(caption=new)
+        return cap
     @classmethod
     def search_by_name(cls, image):
         images = cls.objects.filter(image__icontains=image)
@@ -26,18 +38,52 @@ class Profile(models.Model):
     profile_photo = models.ImageField(upload_to ='images/',default='1')
     name = models.CharField(blank=True, max_length=120)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile',null=True)
+    
+    def __str__(self):
+        return self.name
+    @classmethod
+    def profile(cls):
+        profiles = cls.objects.all()
+        return profiles
 
+    def photo_url(self):
+        if self.profile_photo and hasattr(self.profile_photo, 'url'):
+            return self.profile_photo.url
 
+    def save_profile(self):
+        self.user
 
     def __str__(self):
-        return self.bio
-    def save_image(self):
-        self.save()
+        return self.name
 
-    def delete_image(self):
-        self.delete()
+    @classmethod
+    def search_profile(cls, name):
+        return cls.objects.filter(user__username__icontains=name).all()
+
+    @receiver(post_save, sender=User)
+    def create_user_profile(sender, instance, created, **kwargs):
+        try:
+            instance.profile.save()
+        except ObjectDoesNotExist:
+            Profile.objects.create(user=instance)
 class NewsLetterRecipients(models.Model):
     name = models.CharField(max_length = 30)
     email = models.EmailField()
 
-# likes = models.ManyToManyField(User,related_name=)
+
+class Comment(models.Model):
+    comment = models.TextField()
+    user = models.ForeignKey('Profile',on_delete=models.CASCADE,related_name='comment')
+    photo = models.ForeignKey('Image',on_delete=models.CASCADE,related_name='comment')
+
+    class Meta:
+        ordering = ["-pk"]
+
+    def __str__(self):
+        return f'{self.user.name} Image'
+class Follow(models.Model):
+    follower = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='following')
+    followed = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='followers')
+
+    def __str__(self):
+        return f'{self.follower} Follow'

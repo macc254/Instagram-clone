@@ -9,7 +9,7 @@ from django_registration.backends.one_step.views import RegistrationView
 
 
 urlpatterns=[
-    re_path('^$',views.profile,name = 'profile'),
+    re_path('^$',views.home,name = 'home'),
     re_path(r'^image/',views.display_image,name='displayImages'),
     re_path(r'^search/', views.search_results, name='search_results'),
     re_path('accounts/', include('django_registration.backends.one_step.urls')),
@@ -19,8 +19,10 @@ urlpatterns=[
     # re_path(r'^accounts/logout/', views.logout, {"next_page": '/'}), 
     re_path(r'^tinymce/', include('tinymce.urls')),
     re_path(r'profile/(?P<profile>[a-zA-Z0-9]+)$', views.get_user_profile,name='get_user_profile'),
-
+    re_path('profile/<str:username>/',views.profile,name='profile'),
+    re_path('user_profile/<username>/', views.user_profile, name='user_profile'),
     re_path(r'^new/image$', views.new_image, name='new_image'),
+    re_path(r'like/<int:pk>', views.like, name='like_post'),
 
 
 

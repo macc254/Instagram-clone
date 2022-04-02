@@ -4,13 +4,12 @@
         $('#myInput').trigger('focus')
     })
 </script>
-<h1 class="text-center" style="color:#6153cc;">My Collection</h1>
 <div class="container">
     <!-- Looping through category  -->
     {% for i in image %}
 
 
-    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="border:solid 5px #6153cc;border-radius: 25px;">
+    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
         <a href="#" class="btn btn" type="button" class="btn btn-primary" data-toggle="modal" data-target="#{{i.id}}">
             <img src="{{i.image.url}}" class="img-fluid" alt="Image" class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> </a>
     </div>
@@ -30,10 +29,7 @@
                         <p>{{i.caption}}</p>
                         <p style="color: #6153cc;">Like: {{i.likes}}</p>
                     </div>
-                <div class="modal-footer ">
-                    <button onclick="myFunction()">Copy Text</button>
-
-                </div>
+      
             </div>
         </div>
     </div>
