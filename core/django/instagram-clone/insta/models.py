@@ -67,6 +67,7 @@ class Profile(models.Model):
         except ObjectDoesNotExist:
             Profile.objects.create(user=instance)
 class NewsLetterRecipients(models.Model):
+    is_email_verified = models.BooleanField(default=False)
     name = models.CharField(max_length = 30)
     email = models.EmailField()
 
@@ -81,6 +82,9 @@ class Comment(models.Model):
 
     def __str__(self):
         return f'{self.user.name} Image'
+    def save_comment(self):
+        self.comment 
+    
 class Follow(models.Model):
     follower = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='following')
     followed = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='followers')

@@ -24,9 +24,13 @@ urlpatterns=[
     re_path(r'^new/image$', views.new_image, name='new_image'),
     re_path(r'like/<int:pk>', views.like, name='like_post'),
 
-
-
-
+    re_path(r'^signup/$', views.signup, name='signup'),
+    re_path(r'^activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
+        views.activate, name='activate'),
 ]
+
+
+
+
 if settings.DEBUG:
     urlpatterns+= static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
