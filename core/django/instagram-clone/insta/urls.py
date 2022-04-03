@@ -22,11 +22,13 @@ urlpatterns=[
     re_path('profile/<str:username>/',views.profile,name='profile'),
     re_path('user_profile/<username>/', views.user_profile, name='user_profile'),
     re_path(r'^new/image$', views.new_image, name='new_image'),
-    re_path(r'like/<int:pk>', views.like, name='like_post'),
+    re_path(r'like/<int:pk>', views.get_context_data, name='like_post'),
+    re_path(r'follow_count',views.follow_count,name='follow_count'),
+    re_path(r'BlogPostLike/<int:pk>', views.BlogPostLike, name='BlogPostLike'),
 
-    re_path(r'^signup/$', views.signup, name='signup'),
-    re_path(r'^activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
-        views.activate, name='activate'),
+    
+
+   
 ]
 
 

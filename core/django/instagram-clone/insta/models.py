@@ -3,25 +3,26 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.exceptions import ObjectDoesNotExist
+from django.template.defaultfilters import slugify
+
 
 class Image(models.Model):
     image = models.ImageField(upload_to='images/',default='1')
     name = models.CharField(max_length =30)
     caption = models.CharField(max_length =30)
     profile = models.ForeignKey(User,on_delete=models.CASCADE,default='0')
-    likes = models.ManyToManyField(User,related_name='likes')
+    likes= models.ManyToManyField(User, related_name='image_like')
     comments = models.CharField(max_length =30)
     
     def __str__(self):
-        return self.name
+        return f'{self.profile.username}\'s Image- {self.name}'
     class Meta:
         ordering = ['name']
         
     def save_image(self):
         self.save()
-    def total_likes(self):
+    def number_of_likes(self):
         return self.likes.count()
-
     def delete_image(self):
         self.delete()
     @classmethod
@@ -32,7 +33,19 @@ class Image(models.Model):
     def search_by_name(cls, image):
         images = cls.objects.filter(image__icontains=image)
         return images
-        
+class Preference(models.Model):
+    user= models.ForeignKey(User,on_delete=models.CASCADE,default='0')
+    post= models.ForeignKey(Image,on_delete=models.CASCADE,default='0')
+    value= models.IntegerField()
+    date= models.DateTimeField(auto_now= True)
+
+    
+    def __str__(self):
+        return str(self.user) + ':' + str(self.post) +':' + str(self.value)
+
+    class Meta:
+       unique_together = ("user", "post", "value")
+
 class Profile(models.Model):
     bio = models.CharField(max_length =30)
     profile_photo = models.ImageField(upload_to ='images/',default='1')
@@ -86,8 +99,8 @@ class Comment(models.Model):
         self.comment 
     
 class Follow(models.Model):
-    follower = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='following')
-    followed = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='followers')
+    follower = models.CharField(max_length=50)
+    user = models.CharField(max_length=50)
 
     def __str__(self):
-        return f'{self.follower} Follow'
+        return self.user

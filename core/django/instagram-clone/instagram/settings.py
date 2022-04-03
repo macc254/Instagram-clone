@@ -35,6 +35,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'insta',
+    'crispy_forms',
     'bootstrap4',
     'django.contrib.admin',
     'django.contrib.auth',

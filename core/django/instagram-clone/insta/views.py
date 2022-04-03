@@ -1,66 +1,59 @@
 from django.shortcuts import render,redirect, get_object_or_404
 from django.http  import HttpResponse
-from django.template.loader import render_to_string
-from django.utils.encoding import force_bytes
-from .token import account_activation_token
-from django.contrib.auth import login, authenticate
-from .forms import SignupForm
-from django.contrib.sites.shortcuts import get_current_site
-from django.utils.encoding import force_bytes, force_text
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django import forms
 from django.contrib.auth.models import User
-from django.core.mail import EmailMessage
 from .models import Image,Profile,NewsLetterRecipients,Comment,User,Follow
 from .forms import NewsLetterForm, NewArticleForm
 from django.contrib.auth.decorators import login_required
 from .forms import UploadForm,ProfileForm,UpdateUserForm,UpdateUserProfileForm,CommentForm
-from django.db.models.signals import post_save
-from django.urls import reverse_lazy,reverse
+from django.urls import reverse
 from django.http import HttpResponse, Http404,HttpResponseRedirect
 from .email import send_welcome_email
+from django.views.generic.detail import DetailView
 
-def signup(request):
-    if request.method == 'POST':
-        form = SignupForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.is_active = False
-            user.save()
-            current_site = get_current_site(request)
-            mail_subject = 'Activate your blog account.'
-            message = render_to_string('account_activation_email.html', {
-                'user': user,
-                'domain': current_site.domain,
-                'uid':urlsafe_base64_encode(force_bytes(user.pk)).decode(),
-                'token':account_activation_token.make_token(user),
-            })
-            to_email = form.cleaned_data.get('email')
-            email = EmailMessage(
-                        mail_subject, message, to=[to_email]
-            )
-            email.send()
-            return HttpResponse('Please confirm your email address to complete the registration')
-    else:
-        form = SignupForm()
-    return render(request, 'django_registration/registration_form.html', {'form': form})
 
-def activate(request, uidb64, token):
-    try:
-        uid = force_text(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-    if user is not None and account_activation_token.check_token(user, token):
-        user.is_active = True
-        user.save()
-        login(request, user)
-        # return redirect('home')
-        return HttpResponse('Thank you for your email confirmation. Now you can login your account.')
+class BlogPostDetailView(DetailView):
+    model = Image
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+
+        likes_connected = get_object_or_404(Image, id=self.kwargs['pk'])
+        liked = False
+        if likes_connected.likes.filter(id=self.request.user.id).exists():
+            liked = True
+        data['number_of_likes'] = likes_connected.number_of_likes()
+        data['post_is_liked'] = liked
+        return  data
+    
+def BlogPostLike(request,pk):
+
+    post = get_object_or_404(Image, id=request.POST.get('blogpost_id'),pk=pk)
+    if post.likes.filter(id=request.user.id).exists():
+        post.likes.remove(request.user)
     else:
-        return HttpResponse('Activation link is invalid!')
+        post.likes.add(request.user)
+
+    return HttpResponseRedirect(reverse('BlogPostLike', args=[str(pk)]))
 
 @login_required(login_url='/accounts/login/')
 def home(request):
+    current_user = request.GET.get('user')
+    logged_in_user = request.user.username
+    user_followers =len(Follow.objects.filter(user=current_user))
+    user_following =len(Follow.objects.filter(follower=current_user))
+    user_followers0 =Follow.objects.filter(follower=current_user)
+    user_followers1 = []
+    
+    for i in user_followers0:
+        user_followers0 = i.follower
+        user_followers1.append(user_followers0)
+    if logged_in_user in user_followers1:
+        follow_button_value ='unfollow'
+    else:
+        follow_button_value = 'follow'
+        
+        
     profile = Profile.objects.all()
     image = Image.objects.all()
     if request.method == 'POST':
@@ -76,7 +69,34 @@ def home(request):
             HttpResponseRedirect('home')
     else:
         form = NewsLetterForm()
-    return render(request, 'home.html',{'profile':profile,'image':image,"letterForm":form})
+    return render(request, 'home.html',{
+        'profile':profile,
+        'image':image,
+        "letterForm":form,
+        'current_user': current_user,
+        'user_followers':user_followers,
+        'user_following':user_following,
+        'follow_button_value': follow_button_value,
+        })
+    
+def post_detailview(request, id):
+   
+  if request.method == 'POST':
+    cf = CommentForm(request.POST or None)
+    if cf.is_valid():
+      content = request.POST.get('content')
+      comment = Comment.objects.create(user = request.user, content = content)
+      comment.save()
+      return redirect
+    else:
+      cf = CommentForm()
+       
+    context ={
+      'comment_form':cf,
+      }
+    # return render(request, 'BlogPostLike', context)
+    return HttpResponseRedirect(reverse('BlogPostLike',context))
+
 def get_context_data(request,*args, **kwargs):
     context = super(home).get_context_data(request,*args,)
     stuff = get_object_or_404(Image,id=kwargs['pk'])
@@ -140,6 +160,7 @@ def profile(request):
         'images': images,
     }
     return render(request, 'profile.html', params)
+
 @login_required(login_url='/accounts/login/')
 def update_profile(request):
     if request.method == 'POST':
@@ -177,3 +198,16 @@ def like( request,pk):
     image = get_object_or_404(image, id=request.POST.get('image_id'))
     image.likes.add(request.user)
     return HttpResponseRedirect(reverse('home', args=[str(pk)]))
+
+def follow_count(request):
+    if request.method == 'POST':
+        value = request.POST.get('value')
+        user = request.POST.get('user')
+        follower = request.POST.get('follower')
+        if value == 'follow':
+            followers_cnt = Follow.objects.create(user=user, follower=follower)
+            followers_cnt.save()
+        else:
+            followers_cnt = Follow.objects.get(user=user, follower=follower)
+            followers_cnt.delete()
+        return redirect('/?user='+user)
