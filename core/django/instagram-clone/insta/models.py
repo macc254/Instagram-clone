@@ -58,14 +58,17 @@ class Profile(models.Model):
     def profile(cls):
         profiles = cls.objects.all()
         return profiles
-
+    def delete_profile(self):
+        self.delete()
     def photo_url(self):
         if self.profile_photo and hasattr(self.profile_photo, 'url'):
             return self.profile_photo.url
 
     def save_profile(self):
         self.user
-
+    def update_profile(cls,old,new):
+        bio = Profile.objects.filter(bio=old).update(bio=new)
+        return bio
     def __str__(self):
         return self.name
 
@@ -76,7 +79,7 @@ class Profile(models.Model):
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):
         try:
-            instance.profile.save()
+            instance.Profile.save()
         except ObjectDoesNotExist:
             Profile.objects.create(user=instance)
 class NewsLetterRecipients(models.Model):

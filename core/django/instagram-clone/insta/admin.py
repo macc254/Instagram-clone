@@ -10,3 +10,4 @@ admin.site.register(Preference)
 admin.site.register(NewsLetterRecipients)
 admin.site.register(Follow)
 
+
